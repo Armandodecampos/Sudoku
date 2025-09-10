@@ -544,9 +544,12 @@
                 startScreen.style.display = 'none';
                 getCanvasSize();
                 drawBoard();
-                startTimer();
                 notesModeButton.classList.toggle('active', notesMode);
                 showMessage("Jogo carregado!");
+                // Continue o timer apenas se houver um tempo salvo
+                if (startTime !== null) {
+                     startTimer();
+                }
             } else {
                 startScreen.style.display = 'flex';
                 gameContainer.style.display = 'none';
@@ -569,6 +572,18 @@
             setTimeout(() => {
                 messageBox.classList.remove('visible');
             }, 2000);
+        }
+
+        // Fun\u00e7\u00e3o para resetar o estado do jogo
+        function resetGame() {
+            board = [];
+            solution = [];
+            originalBoard = [];
+            selectedCell = { row: -1, col: -1 };
+            notesMode = false;
+            stopTimer();
+            startTime = null; // Reinicia o tempo
+            localStorage.removeItem('sudokuGame');
         }
 
         // Função para gerar um tabuleiro de Sudoku completo
@@ -996,11 +1011,11 @@
 
         // Eventos do modal de novo jogo
         confirmNewGameBtn.addEventListener('click', () => {
-            stopTimer();
-            gameContainer.style.display = 'none';
+            resetGame();
             startScreen.style.display = 'flex';
+            gameContainer.style.display = 'none';
             newGameModal.style.display = 'none';
-            localStorage.removeItem('sudokuGame');
+            timerDisplay.textContent = '00:00'; // Reinicia o cronômetro para 00:00
         });
         
         cancelNewGameBtn.addEventListener('click', () => {
@@ -1024,6 +1039,7 @@
         
         // Inicia o jogo
         startButton.addEventListener('click', () => {
+            resetGame();
             startScreen.style.display = 'none';
             gameContainer.style.display = 'flex';
             getCanvasSize();
