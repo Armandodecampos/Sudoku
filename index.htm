@@ -508,6 +508,40 @@
         let timerInterval;
         let startTime;
 
+        // Funções para salvar e carregar o jogo
+        function saveGame() {
+            const gameState = {
+                board: board,
+                solution: solution,
+                originalBoard: originalBoard,
+                notesMode: notesMode,
+                startTime: startTime
+            };
+            localStorage.setItem('sudokuGame', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const savedState = localStorage.getItem('sudokuGame');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                board = gameState.board;
+                solution = gameState.solution;
+                originalBoard = gameState.originalBoard;
+                notesMode = gameState.notesMode;
+                startTime = gameState.startTime;
+                
+                gameContainer.style.display = 'flex';
+                startScreen.style.display = 'none';
+                getCanvasSize();
+                drawBoard();
+                startTimer();
+                showMessage("Jogo carregado!");
+            } else {
+                startScreen.style.display = 'flex';
+                gameContainer.style.display = 'none';
+            }
+        }
+
         // Função para obter o tamanho do canvas
         function getCanvasSize() {
             const container = document.querySelector('.sudoku-container');
@@ -813,6 +847,7 @@
                 checkWinCondition();
             }
             drawBoard();
+            saveGame();
         }
 
         // Verifica a condição de vitória
@@ -838,6 +873,7 @@
             
             stopTimer();
             showMessage("Parabéns! Você resolveu o Sudoku!");
+            localStorage.removeItem('sudokuGame');
         }
 
         // Função para lidar com a limpeza da célula
@@ -871,11 +907,14 @@
             }
             
             drawBoard();
+            saveGame();
         }
 
         // Funções do cronômetro
         function startTimer() {
-            startTime = Date.now();
+            if (!startTime) {
+                startTime = Date.now();
+            }
             timerInterval = setInterval(() => {
                 const elapsedTime = Date.now() - startTime;
                 const minutes = Math.floor(elapsedTime / 60000);
@@ -888,6 +927,11 @@
         function stopTimer() {
             clearInterval(timerInterval);
         }
+
+        // Lógica para salvar o jogo ao sair ou recarregar a página
+        window.addEventListener('beforeunload', saveGame);
+        window.addEventListener('blur', saveGame);
+
 
         // Event listeners
         canvas.addEventListener('click', handleCanvasClick);
@@ -946,6 +990,7 @@
             gameContainer.style.display = 'none';
             startScreen.style.display = 'flex';
             newGameModal.style.display = 'none';
+            localStorage.removeItem('sudokuGame');
         });
         
         cancelNewGameBtn.addEventListener('click', () => {
@@ -976,12 +1021,12 @@
             generateSudoku(difficulty);
             drawBoard();
             startTimer();
+            saveGame();
         });
 
         // Inicialização da tela
         window.onload = function() {
-            gameContainer.style.display = 'none';
-            getCanvasSize();
+            loadGame();
         }
     </script>
 </body>
