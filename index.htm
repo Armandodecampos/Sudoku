@@ -263,11 +263,21 @@
         }
 
         .notes-mode-btn {
-            background-color: #3498db;
+            background-color: #bdc3c7; /* Cor padr\u00e3o para desativado */
+            color: #2c3e50;
+        }
+        
+        .notes-mode-btn.active {
+            background-color: #3498db; /* Cor para ativado */
+            color: white;
+        }
+        
+        .notes-mode-btn.active:hover {
+            background-color: #2980b9;
         }
 
         .notes-mode-btn:hover {
-            background-color: #2980b9;
+            background-color: #95a5a6;
         }
 
         .notes-mode-btn i {
@@ -447,7 +457,7 @@
                 </div>
                 <button id="notes-mode-button" class="notes-mode-btn">
                     <i class="fas fa-pencil-alt"></i>
-                    Escrever
+                    Anotar
                 </button>
             </div>
         </div>
@@ -535,6 +545,7 @@
                 getCanvasSize();
                 drawBoard();
                 startTimer();
+                notesModeButton.classList.toggle('active', notesMode);
                 showMessage("Jogo carregado!");
             } else {
                 startScreen.style.display = 'flex';
@@ -946,11 +957,10 @@
                 clearSelectedCell();
             } else if (target && target.id === 'notes-mode-button') {
                 notesMode = !notesMode;
+                notesModeButton.classList.toggle('active', notesMode);
                 if (notesMode) {
-                    notesModeButton.classList.add('notes-mode-on');
                     showMessage("Modo Anotações Ativado");
                 } else {
-                    notesModeButton.classList.remove('notes-mode-on');
                     showMessage("Modo Anotações Desativado");
                 }
             }
