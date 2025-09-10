@@ -19,6 +19,7 @@
             flex-direction: column;
             padding: 20px;
             box-sizing: border-box;
+            position: relative;
         }
 
         .start-screen {
@@ -67,24 +68,44 @@
             backdrop-filter: blur(5px);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between; /* Altera a justificação para espaçar os itens */
             align-items: center;
             padding: 0 20px;
             z-index: 1000;
         }
         .top-bar h1 {
-            margin-right: auto;
+            margin: 0;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding-top: 60px; /* Adiciona padding para evitar que o conteúdo fique atrás do top-bar */
+            box-sizing: border-box;
+            justify-content: center;
+            align-items: center;
         }
 
         .sudoku-container {
             background-color: #ffffff;
-            border-radius: 12px;
+            border-radius: 0;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
+            max-width: none;
+            max-height: none;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         h1 {
@@ -137,7 +158,7 @@
             align-items: center;
         }
 
-        .game-buttons-container button, .clear-btn {
+        .game-buttons-container button, .clear-btn, .notes-mode-btn {
             background-color: #2ecc71;
             color: white;
             border: none;
@@ -148,6 +169,9 @@
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .game-buttons-container button.new-game {
@@ -164,12 +188,12 @@
             background-color: #2980b9;
         }
 
-        .game-buttons-container button:hover, .clear-btn:hover {
+        .game-buttons-container button:hover, .clear-btn:hover, .notes-mode-btn:hover {
             background-color: #27ae60;
             transform: translateY(-2px);
         }
         
-        .game-buttons-container button:active, .clear-btn:active {
+        .game-buttons-container button:active, .clear-btn:active, .notes-mode-btn:active {
             transform: translateY(0);
         }
 
@@ -185,6 +209,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
+            flex-grow: 1; /* Permite que o teclado numérico ocupe o espaço restante */
         }
 
         .number-pad button {
@@ -209,9 +234,7 @@
             transform: scale(1);
         }
         
-        .clear-btn {
-            background-color: #e74c3c;
-            color: white;
+        .clear-btn, .notes-mode-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -222,7 +245,12 @@
             cursor: pointer;
             transition: background-color 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            height: fit-content;
+            height: 100px;
+            width: 100px; /* Adiciona largura fixa para ambos os botões */
+        }
+
+        .clear-btn {
+            background-color: #e74c3c;
         }
 
         .clear-btn:hover {
@@ -233,7 +261,20 @@
             font-size: 2rem;
             margin-bottom: 5px;
         }
-        
+
+        .notes-mode-btn {
+            background-color: #3498db;
+        }
+
+        .notes-mode-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .notes-mode-btn i {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
         /* Adiciona a animação de tremor */
         @keyframes shake {
             0% { transform: translateX(0); }
@@ -257,14 +298,17 @@
                 flex-direction: column;
                 height: auto;
                 padding: 10px;
-                align-items: flex-start;
+                align-items: center; /* Centraliza verticalmente */
                 gap: 10px;
+                justify-content: center; /* Centraliza horizontalmente */
             }
             .top-bar h1, .timer-display {
                 margin: 0;
             }
             .game-buttons-container {
                 margin-left: 0;
+                justify-content: center; /* Centraliza horizontalmente */
+                align-items: center; /* Centraliza verticalmente */
             }
             .number-pad button {
                 width: 40px;
@@ -274,6 +318,10 @@
             canvas {
                 width: 95vw; /* Ocupa 95% da largura da tela */
                 height: 95vw;
+            }
+            .game-buttons-container {
+                width: 100%;
+                justify-content: space-around;
             }
         }
         
@@ -286,9 +334,74 @@
                 gap: 50px;
             }
             .input-controls {
-                flex-direction: column;
+                flex-direction: row;
                 gap: 20px;
             }
+        }
+        
+        .input-controls .clear-btn, .input-controls .notes-mode-btn, .input-controls .number-pad {
+            order: 2;
+        }
+        
+        .input-controls .clear-btn {
+            order: 1;
+        }
+        
+        .input-controls .notes-mode-btn {
+            order: 3;
+        }
+
+        /* Estilo para o modal de confirmação */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #confirm-solve, #confirm-new-game {
+            background-color: #e74c3c;
+            color: white;
+        }
+        #confirm-solve:hover, #confirm-new-game:hover {
+            background-color: #c0392b;
+        }
+        #cancel-solve, #cancel-new-game {
+            background-color: #bdc3c7;
+            color: #2c3e50;
+        }
+        #cancel-solve:hover, #cancel-new-game:hover {
+            background-color: #95a5a6;
         }
     </style>
 </head>
@@ -308,17 +421,19 @@
 
     <div id="game-container" style="display: none;">
         <div class="top-bar">
-            <h1>Sudoku</h1>
+            <span id="timer-display" class="timer-display">00:00</span>
             <div class="game-buttons-container">
-                <button id="solve-button">Resolver</button>
-                <button id="new-game-button" class="new-game">Novo Jogo</button>
-                <button id="notes-mode-button">Modo Anotações</button>
+                <button id="solve-button"><i class="fas fa-check"></i> <span>Resolver</span></button>
+                <button id="new-game-button" class="new-game"><i class="fas fa-redo"></i> <span>Novo Jogo</span></button>
             </div>
         </div>
         <div class="sudoku-container">
             <canvas id="sudokuCanvas"></canvas>
             <div class="input-controls">
-                <span id="timer-display" class="timer-display">00:00</span>
+                <button class="clear-btn">
+                    <i class="fas fa-eraser"></i>
+                    Limpar
+                </button>
                 <div class="number-pad">
                     <button class="num-btn">1</button>
                     <button class="num-btn">2</button>
@@ -330,15 +445,37 @@
                     <button class="num-btn">8</button>
                     <button class="num-btn">9</button>
                 </div>
-                <button class="clear-btn">
-                    <i class="fas fa-eraser"></i>
-                    Limpar
+                <button id="notes-mode-button" class="notes-mode-btn">
+                    <i class="fas fa-pencil-alt"></i>
+                    Escrever
                 </button>
             </div>
         </div>
     </div>
     
     <div id="messageBox" class="message-box"></div>
+
+    <!-- Modal de Confirmação para Resolver -->
+    <div id="solveModal" class="modal">
+        <div class="modal-content">
+            <p>Você tem certeza que deseja resolver o Sudoku?</p>
+            <div class="modal-buttons">
+                <button id="confirm-solve">Sim</button>
+                <button id="cancel-solve">Não</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação para Novo Jogo -->
+    <div id="newGameModal" class="modal">
+        <div class="modal-content">
+            <p>Você tem certeza que deseja iniciar um novo jogo?</p>
+            <div class="modal-buttons">
+                <button id="confirm-new-game">Sim</button>
+                <button id="cancel-new-game">Não</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const canvas = document.getElementById('sudokuCanvas');
@@ -354,6 +491,12 @@
         const startButton = document.getElementById('start-button');
         const gameContainer = document.getElementById('game-container');
         const difficultySelect = document.getElementById('difficulty-select');
+        const solveModal = document.getElementById('solveModal');
+        const confirmSolveBtn = document.getElementById('confirm-solve');
+        const cancelSolveBtn = document.getElementById('cancel-solve');
+        const newGameModal = document.getElementById('newGameModal');
+        const confirmNewGameBtn = document.getElementById('confirm-new-game');
+        const cancelNewGameBtn = document.getElementById('cancel-new-game');
         
         const boardSize = 9;
         let board = [];
@@ -757,16 +900,25 @@
                 handleNumberInput(value);
             } else if (target && target.classList.contains('clear-btn')) {
                 clearSelectedCell();
+            } else if (target && target.id === 'notes-mode-button') {
+                notesMode = !notesMode;
+                if (notesMode) {
+                    notesModeButton.classList.add('notes-mode-on');
+                    showMessage("Modo Anotações Ativado");
+                } else {
+                    notesModeButton.classList.remove('notes-mode-on');
+                    showMessage("Modo Anotações Desativado");
+                }
             }
         });
-
-        newGameButton.addEventListener('click', () => {
-            stopTimer();
-            gameContainer.style.display = 'none';
-            startScreen.style.display = 'flex';
-        });
         
+        // Botão de resolver abre o modal de confirmação
         solveButton.addEventListener('click', () => {
+            solveModal.style.display = 'flex';
+        });
+
+        // Eventos do modal
+        confirmSolveBtn.addEventListener('click', () => {
             stopTimer();
             for (let row = 0; row < boardSize; row++) {
                 for (let col = 0; col < boardSize; col++) {
@@ -776,19 +928,30 @@
             }
             drawBoard();
             showMessage("Tabuleiro resolvido!");
+            solveModal.style.display = 'none';
         });
 
-        notesModeButton.addEventListener('click', () => {
-            notesMode = !notesMode;
-            if (notesMode) {
-                notesModeButton.classList.add('notes-mode-on');
-                showMessage("Modo Anotações Ativado");
-            } else {
-                notesModeButton.classList.remove('notes-mode-on');
-                showMessage("Modo Anotações Desativado");
-            }
+        cancelSolveBtn.addEventListener('click', () => {
+            solveModal.style.display = 'none';
+        });
+        
+        // Botão de novo jogo abre o modal de confirmação
+        newGameButton.addEventListener('click', () => {
+            newGameModal.style.display = 'flex';
         });
 
+        // Eventos do modal de novo jogo
+        confirmNewGameBtn.addEventListener('click', () => {
+            stopTimer();
+            gameContainer.style.display = 'none';
+            startScreen.style.display = 'flex';
+            newGameModal.style.display = 'none';
+        });
+        
+        cancelNewGameBtn.addEventListener('click', () => {
+            newGameModal.style.display = 'none';
+        });
+        
         window.addEventListener('resize', () => {
             getCanvasSize();
             drawBoard();
