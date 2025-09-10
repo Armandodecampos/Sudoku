@@ -295,6 +295,14 @@
 <body>
     <div class="start-screen" id="start-screen">
         <h1>Sudoku</h1>
+        <div class="difficulty-control" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <label for="difficulty-select" style="font-size: 1.2rem; color: #34495e; font-weight: bold;">Escolha a Dificuldade:</label>
+            <select id="difficulty-select" style="padding: 10px; border-radius: 8px; border: 2px solid #bdc3c7; font-size: 1rem;">
+                <option value="easy">Fácil</option>
+                <option value="medium" selected>Médio</option>
+                <option value="hard">Difícil</option>
+            </select>
+        </div>
         <button id="start-button">Iniciar</button>
     </div>
 
@@ -345,6 +353,7 @@
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
         const gameContainer = document.getElementById('game-container');
+        const difficultySelect = document.getElementById('difficulty-select');
         
         const boardSize = 9;
         let board = [];
@@ -375,15 +384,30 @@
         }
 
         // Função para gerar um tabuleiro de Sudoku completo
-        function generateSudoku() {
+        function generateSudoku(difficulty) {
             board = Array.from({ length: boardSize }, () => Array.from({ length: boardSize }, () => ({ value: 0, notes: new Set() })));
             let tempBoard = Array.from({ length: boardSize }, () => Array(boardSize).fill(0));
             solveSudoku(tempBoard);
             solution = JSON.parse(JSON.stringify(tempBoard));
             
+            // Define o número de células a remover com base na dificuldade
+            let cellsToRemove;
+            switch (difficulty) {
+                case 'easy':
+                    cellsToRemove = 30; 
+                    break;
+                case 'medium':
+                    cellsToRemove = 50; 
+                    break;
+                case 'hard':
+                    cellsToRemove = 60;
+                    break;
+                default:
+                    cellsToRemove = 50; // Padrão
+            }
+
             // Remove números para criar o jogo
             originalBoard = JSON.parse(JSON.stringify(solution));
-            const cellsToRemove = 45; // Número de células a serem removidas para um jogo de dificuldade média
             for (let i = 0; i < cellsToRemove; i++) {
                 let row = Math.floor(Math.random() * boardSize);
                 let col = Math.floor(Math.random() * boardSize);
@@ -738,11 +762,8 @@
 
         newGameButton.addEventListener('click', () => {
             stopTimer();
-            selectedCell = { row: -1, col: -1 };
-            generateSudoku();
-            drawBoard();
-            startTimer();
-            showMessage("Novo jogo iniciado!");
+            gameContainer.style.display = 'none';
+            startScreen.style.display = 'flex';
         });
         
         solveButton.addEventListener('click', () => {
@@ -788,7 +809,8 @@
             startScreen.style.display = 'none';
             gameContainer.style.display = 'flex';
             getCanvasSize();
-            generateSudoku();
+            const difficulty = difficultySelect.value;
+            generateSudoku(difficulty);
             drawBoard();
             startTimer();
         });
